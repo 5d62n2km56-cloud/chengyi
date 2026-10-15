@@ -14,6 +14,7 @@
 <link rel="stylesheet" href="css/gallery.css">
 <link rel="stylesheet" href="css/album.css">
 <link rel="stylesheet" href="css/dialogs.css">
+<link rel="stylesheet" href="css/voice.css">
 <link rel="stylesheet" href="css/responsive.css">
 <script type="importmap">
 { "imports": { "three": "./js/vendor/three.module.min.js" } }
@@ -147,23 +148,6 @@
     <p class="save-status" id="save-status" role="status"></p>
     <p class="drag-hint" id="drag-hint">拖动可旋转 · 滚轮远近</p>
 
-    <button class="voice-pill" id="voice-toggle" aria-expanded="false" aria-controls="chat-panel">
-      <span class="orb" id="orb" data-state="idle" aria-hidden="true"><i></i></span>
-      <span>问问承艺之声</span>
-    </button>
-    <aside class="chat-panel" id="chat-panel" aria-label="承艺之声" hidden>
-      <div class="chat-top">
-        <div><b>承艺之声</b><small id="orb-label">在这儿，等你开口</small></div>
-        <button class="icon-btn" id="chat-close" aria-label="收起对话">×</button>
-      </div>
-      <div class="messages" id="messages" role="log" aria-live="polite" aria-label="AI 对话"></div>
-      <div class="chat-prompts" id="chat-prompts"></div>
-      <form class="chat-form" id="chat-form">
-        <input id="chat-input" aria-label="告诉 AI 你的创作想法" maxlength="300" autocomplete="off">
-        <button type="submit" aria-label="发送">发送</button>
-      </form>
-      <p class="chat-disclaimer">规则演示，未接入真实模型 · 知识回答只引用册页</p>
-    </aside>
   </div>
 </section>
 
@@ -182,6 +166,25 @@
     <p class="gallery-local">免登录原型 · 作品只保存在当前浏览器，可下载图片留存</p>
   </div>
 </section>
+
+<!-- 承艺之声：各场景共用，收在右下角，需要时展开 -->
+  <button class="voice-pill" id="voice-toggle" aria-expanded="false" aria-controls="chat-panel">
+    <span class="orb" id="orb" data-state="idle" aria-hidden="true"><i></i></span>
+    <span>问问承艺之声</span>
+  </button>
+  <aside class="chat-panel" id="chat-panel" aria-label="承艺之声" hidden>
+    <div class="chat-top">
+      <div><b>承艺之声</b><small id="orb-label">在这儿，等你开口</small></div>
+      <button class="icon-btn" id="chat-close" aria-label="收起对话">×</button>
+    </div>
+    <div class="messages" id="messages" role="log" aria-live="polite" aria-label="AI 对话"></div>
+    <div class="chat-prompts" id="chat-prompts"></div>
+    <form class="chat-form" id="chat-form">
+      <input id="chat-input" aria-label="和承艺之声说话" maxlength="300" autocomplete="off">
+      <button type="submit" aria-label="发送">发送</button>
+    </form>
+    <p class="chat-disclaimer" id="chat-disclaimer"></p>
+  </aside>
 
 <div class="toast" id="toast" role="status"></div>
 </main>

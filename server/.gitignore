@@ -1,0 +1,10 @@
+.venv/
+.env
+data/
+__pycache__/
+.pytest_cache/
+*.pyc
+.local-credentials.txt
+.model-config-*
+*.log
+.DS_Store

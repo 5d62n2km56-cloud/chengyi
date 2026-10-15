@@ -10,6 +10,7 @@ import { initExplore, getLandscape } from './views/explore.js';
 import { initWorkshop, openAtelier, openCreate } from './views/workshop.js';
 import { initGallery } from './views/gallery.js';
 import { initGuide } from './views/guide.js';
+import { initVoice } from './views/voice.js';
 import { initOpening, showOpening, shouldAutoPlay } from './views/opening.js';
 
 initSettings();
@@ -19,6 +20,7 @@ initWorkshop();
 initExplore({ enterAtelier: (craft, region) => openAtelier(craft, region), resume: r => openCreate(r.craft) });
 initGallery({ openCreate });
 initGuide();
+initVoice();
 initOpening({ landscape: getLandscape(), done: () => showView('explore') });
 
 $$('[data-view]').forEach(b => b.addEventListener('click', () => showView(b.dataset.view)));

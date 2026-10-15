@@ -1,6 +1,6 @@
-// 承艺之声：规则演示版 AI。未接入真实模型。
+// 承艺之声的规则部分。改作品、撤销、下一步、跑题这些由规则处理（kind 见 LOCAL_KINDS），
+// 知识问答和其余的话交给大模型后台（backend.js）；后台不可用时，规则版的回答就是兜底。
 // 规则：改作品先给建议、确认后才应用；知识问答只引用册页并附出处；册页没有的如实说明（PRD 7.2）。
-// 接入真实模型时，保持 respond() 的返回结构不变即可。
 
 import { CRAFTS, PATTERNS, STEP_COUNT, colorOf, shapeOf } from '../data/crafts.js';
 import { ALBUM } from '../data/album.js';
@@ -69,10 +69,11 @@ function paragraphs(craft, ids) {
 }
 
 function answerKnowledge(craft, text) {
-  for (const [re, ids] of KNOWLEDGE[craft]) {
+  for (const [re, ids] of KNOWLEDGE[craft] || []) {
     if (re.test(text)) {
       const found = paragraphs(craft, ids);
       return {
+        kind: 'knowledge',
         reply: found.map(p => p.text).join(' '),
         cite: found.map(p => ({ craft, id: p.id })),
       };
@@ -86,27 +87,31 @@ function stepAnswer(craft, step) {
   const ref = c.steps[step].album;
   const found = paragraphs(craft, [ref]);
   return {
+    kind: 'step',
     reply: `${c.copy[step]} ${found[0]?.text || ''}`.trim(),
     cite: found.map(p => ({ craft, id: p.id })),
   };
 }
 
-// 返回 { reply, proposal?, cite?, quick? }
+// 这几类回答始终用规则，不问大模型：它们要么改作品（必须先建议、再确认），要么是固定说法
+export const LOCAL_KINDS = new Set(['offtopic', 'step', 'undo', 'next', 'refuse', 'edit']);
+
+// 创作台里的对话。返回 { kind, reply, proposal?, cite?, quick?, openAlbum? }
 export function respond(text, craft, state) {
   const c = CRAFTS[craft];
   const clean = text.trim();
 
   if (OFF_TOPIC.test(clean)) {
-    return { reply: `这个话题我帮不上忙。我们回到${c.title.replace('工坊', '')}上来：可以问我工艺来历，或者告诉我想怎么改作品。` };
+    return { kind: 'offtopic', reply: `这个话题我帮不上忙。我们回到${c.title.replace('工坊', '')}上来：可以问我工艺来历，或者告诉我想怎么改作品。` };
   }
   if (/讲讲这道工序|这道工序|这一步|这步怎么/.test(clean)) return stepAnswer(craft, state.step);
   if (/撤销|退回|还原上一步/.test(clean)) {
-    return { reply: '可以。确认后退回上一版，当前修改仍可重做。', proposal: { kind: 'undo', summary: '撤销最近一次作品修改。', patch: {} } };
+    return { kind: 'undo', reply: '可以。确认后退回上一版，当前修改仍可重做。', proposal: { kind: 'undo', summary: '撤销最近一次作品修改。', patch: {} } };
   }
   if (/下一步|下一道|继续工序/.test(clean)) {
     return state.step < STEP_COUNT - 1
-      ? { reply: '这一步会保留你的设计，展示下一道工序。', proposal: { patch: { step: state.step + 1 }, summary: `进入「${c.steps[state.step + 1].name}」。` } }
-      : { reply: '已经是最后一道工序了，可以点「完成作品」为它命名。' };
+      ? { kind: 'next', reply: '这一步会保留你的设计，展示下一道工序。', proposal: { patch: { step: state.step + 1 }, summary: `进入「${c.steps[state.step + 1].name}」。` } }
+      : { kind: 'next', reply: '已经是最后一道工序了，可以点「完成作品」为它命名。' };
   }
 
   // 改作品意图
@@ -145,7 +150,7 @@ export function respond(text, craft, state) {
       changes.push('增加重复剪刻单元');
     }
     if (/画|手绘|自由生成|生成一个纹样|上传/.test(clean)) {
-      return { reply: '一期还不支持自由绘制或生成新纹样，纹样只从纹样库中选，保证每个纹样都有出处。可以试试「换成云纹」或「改成花卉」。' };
+      return { kind: 'refuse', reply: '一期还不支持自由绘制或生成新纹样，纹样只从纹样库中选，保证每个纹样都有出处。可以试试「换成云纹」或「改成花卉」。' };
     }
   }
 
@@ -154,6 +159,7 @@ export function respond(text, craft, state) {
     const pattern = PATTERNS.find(p => p.id === patch.pattern);
     const meaning = pattern && pattern.id !== 'plain' ? ` ${pattern.name}的寓意：${pattern.meaning}` : '';
     return {
+      kind: 'edit',
       reply: `我把你的想法整理成下面这组修改，确认后再应用，也可以继续手动调整。${meaning}`,
       proposal: { patch, summary: `${changes.join('；')}。` },
       cite: pattern?.album ? [{ craft, id: pattern.album }] : undefined,
@@ -163,14 +169,31 @@ export function respond(text, craft, state) {
   const knowledge = answerKnowledge(craft, clean);
   if (knowledge) return knowledge;
 
-  if (QUESTION.test(clean)) {
-    return { reply: '这个问题册页里还没收录，我不想随口编一个答案给你。可以先翻翻册页，或者换个问法问我工艺、材料和纹样。', openAlbum: true };
-  }
+  if (QUESTION.test(clean)) return notInAlbum();
 
   return {
+    kind: 'clarify',
     reply: '这句话我还没理解清楚。你是想改作品的形状、颜色或纹样，还是想了解这道工序？可以点下面的快捷选项。',
     quick: true,
   };
+}
+
+const notInAlbum = () => ({
+  kind: 'unknown',
+  reply: '这个问题册页里还没收录，我不想随口编一个答案给你。可以先翻翻册页，或者换个问法问我工艺、材料和纹样。',
+  openAlbum: true,
+});
+
+// 创作台以外（山河、工坊入口、我的作品）的对话：只答不改。craft 为 null 表示没有对应的册页
+export function guideRespond(text, craft) {
+  const clean = text.trim();
+  if (OFF_TOPIC.test(clean)) {
+    return { kind: 'offtopic', reply: '这个话题我帮不上忙。我们回到手艺上来：可以问我瓷器、剪纸的来历、材料和工序。' };
+  }
+  const knowledge = craft && answerKnowledge(craft, clean);
+  if (knowledge) return knowledge;
+  if (QUESTION.test(clean)) return notInAlbum();
+  return { kind: 'clarify', reply: '可以问我这门手艺的来历、材料和工序，或者去瓷器、剪纸工坊亲手做一件。' };
 }
 
 // AI 不可用时的快捷选项（PRD 7.3）：直接作用于作品，不经过对话

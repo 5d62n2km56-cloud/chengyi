@@ -1,0 +1,2156 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "非遗大模型讲解后端 · 轻量版",
+    "description": "三个核心板块：非遗资料、大模型讲解与问答、前端交互接口。",
+    "version": "0.2.0"
+  },
+  "paths": {
+    "/api/v1/voice/status": {
+      "get": {
+        "tags": [
+          "语音"
+        ],
+        "summary": "Voice Status",
+        "operationId": "voice_status_api_v1_voice_status_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_SpeechStatus_"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/health": {
+      "get": {
+        "tags": [
+          "运行状态"
+        ],
+        "summary": "Health",
+        "operationId": "health_health_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_HealthOutput_"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/items": {
+      "get": {
+        "tags": [
+          "物品"
+        ],
+        "summary": "Items",
+        "operationId": "items_api_v1_items_get",
+        "parameters": [
+          {
+            "name": "search",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 100,
+              "default": "",
+              "title": "Search"
+            }
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "maxLength": 80,
+              "default": "",
+              "title": "Category"
+            }
+          },
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "default": 1,
+              "title": "Page"
+            }
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "maximum": 100,
+              "minimum": 1,
+              "default": 20,
+              "title": "Page Size"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_ItemPage_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/items/{item_id}": {
+      "get": {
+        "tags": [
+          "物品"
+        ],
+        "summary": "Item Detail",
+        "operationId": "item_detail_api_v1_items__item_id__get",
+        "parameters": [
+          {
+            "name": "item_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Item Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_ItemPublic_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/sessions": {
+      "post": {
+        "tags": [
+          "会话"
+        ],
+        "summary": "New Session",
+        "operationId": "new_session_api_v1_sessions_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SessionInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_SessionCreated_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/sessions/{session_id}": {
+      "get": {
+        "tags": [
+          "会话"
+        ],
+        "summary": "Read Session",
+        "operationId": "read_session_api_v1_sessions__session_id__get",
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Session Id"
+            }
+          },
+          {
+            "name": "x-session-token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "X-Session-Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_SessionState_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/sessions/{session_id}/transcribe": {
+      "post": {
+        "tags": [
+          "语音"
+        ],
+        "summary": "Recognize",
+        "operationId": "recognize_api_v1_sessions__session_id__transcribe_post",
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Session Id"
+            }
+          },
+          {
+            "name": "x-session-token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "X-Session-Token"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_VoiceTranscription_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        },
+        "requestBody": {
+          "required": true,
+          "content": {
+            "audio/wav": {
+              "schema": {
+                "type": "string",
+                "format": "binary"
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/sessions/{session_id}/interact": {
+      "post": {
+        "tags": [
+          "交互"
+        ],
+        "summary": "Interact",
+        "operationId": "interact_api_v1_sessions__session_id__interact_post",
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Session Id"
+            }
+          },
+          {
+            "name": "x-session-token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "X-Session-Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InteractionInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_Reply_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/sessions/{session_id}/interact/stream": {
+      "post": {
+        "tags": [
+          "交互"
+        ],
+        "summary": "Interact Stream",
+        "operationId": "interact_stream_api_v1_sessions__session_id__interact_stream_post",
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Session Id"
+            }
+          },
+          {
+            "name": "x-session-token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "X-Session-Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InteractionInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "SSE：start、delta、reset、result 或 error，详见前端对接说明。",
+            "content": {
+              "text/event-stream": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/sessions/{session_id}/interact/voice-stream": {
+      "post": {
+        "tags": [
+          "语音"
+        ],
+        "summary": "Voice Interact",
+        "operationId": "voice_interact_api_v1_sessions__session_id__interact_voice_stream_post",
+        "parameters": [
+          {
+            "name": "session_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Session Id"
+            }
+          },
+          {
+            "name": "x-session-token",
+            "in": "header",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "",
+              "title": "X-Session-Token"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/InteractionInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "SSE：文字事件 + 按句 audio + speech_error + voice_done 耗时。",
+            "content": {
+              "text/event-stream": {
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/login": {
+      "post": {
+        "tags": [
+          "管理登录"
+        ],
+        "summary": "Login",
+        "operationId": "login_api_v1_admin_login_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/LoginInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_LoginOutput_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/model": {
+      "get": {
+        "tags": [
+          "大模型接入"
+        ],
+        "summary": "Read Model",
+        "operationId": "read_model_api_v1_admin_model_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_ModelStatus_"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "大模型接入"
+        ],
+        "summary": "Configure Model",
+        "operationId": "configure_model_api_v1_admin_model_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ModelConfigInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_ModelStatus_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/model/test": {
+      "post": {
+        "tags": [
+          "大模型接入"
+        ],
+        "summary": "Test Model",
+        "operationId": "test_model_api_v1_admin_model_test_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_ModelProbe_"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/speech": {
+      "get": {
+        "tags": [
+          "语音"
+        ],
+        "summary": "Read Speech",
+        "operationId": "read_speech_api_v1_admin_speech_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_SpeechStatus_"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "语音"
+        ],
+        "summary": "Configure Speech",
+        "operationId": "configure_speech_api_v1_admin_speech_put",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/SpeechConfigInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_SpeechStatus_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/speech/test": {
+      "post": {
+        "tags": [
+          "语音"
+        ],
+        "summary": "Test Speech",
+        "operationId": "test_speech_api_v1_admin_speech_test_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_SpeechProbe_"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/items": {
+      "get": {
+        "tags": [
+          "管理"
+        ],
+        "summary": "Admin Items",
+        "operationId": "admin_items_api_v1_admin_items_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_list_ItemAdmin__"
+                }
+              }
+            }
+          }
+        }
+      },
+      "post": {
+        "tags": [
+          "管理"
+        ],
+        "summary": "Add Item",
+        "operationId": "add_item_api_v1_admin_items_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ItemInput"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_ItemAdmin_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/admin/items/{item_id}": {
+      "put": {
+        "tags": [
+          "管理"
+        ],
+        "summary": "Update Item",
+        "operationId": "update_item_api_v1_admin_items__item_id__put",
+        "parameters": [
+          {
+            "name": "item_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Item Id"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ItemInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Envelope_ItemAdmin_"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Action": {
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "highlight",
+              "play_animation",
+              "show_steps"
+            ],
+            "title": "Type"
+          },
+          "target": {
+            "type": "string",
+            "title": "Target"
+          }
+        },
+        "type": "object",
+        "required": [
+          "type",
+          "target"
+        ],
+        "title": "Action"
+      },
+      "Envelope_HealthOutput_": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/HealthOutput"
+          },
+          "request_id": {
+            "type": "string",
+            "title": "Request Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data",
+          "request_id"
+        ],
+        "title": "Envelope[HealthOutput]"
+      },
+      "Envelope_ItemAdmin_": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/ItemAdmin"
+          },
+          "request_id": {
+            "type": "string",
+            "title": "Request Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data",
+          "request_id"
+        ],
+        "title": "Envelope[ItemAdmin]"
+      },
+      "Envelope_ItemPage_": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/ItemPage"
+          },
+          "request_id": {
+            "type": "string",
+            "title": "Request Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data",
+          "request_id"
+        ],
+        "title": "Envelope[ItemPage]"
+      },
+      "Envelope_ItemPublic_": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/ItemPublic"
+          },
+          "request_id": {
+            "type": "string",
+            "title": "Request Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data",
+          "request_id"
+        ],
+        "title": "Envelope[ItemPublic]"
+      },
+      "Envelope_LoginOutput_": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/LoginOutput"
+          },
+          "request_id": {
+            "type": "string",
+            "title": "Request Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data",
+          "request_id"
+        ],
+        "title": "Envelope[LoginOutput]"
+      },
+      "Envelope_ModelProbe_": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/ModelProbe"
+          },
+          "request_id": {
+            "type": "string",
+            "title": "Request Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data",
+          "request_id"
+        ],
+        "title": "Envelope[ModelProbe]"
+      },
+      "Envelope_ModelStatus_": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/ModelStatus"
+          },
+          "request_id": {
+            "type": "string",
+            "title": "Request Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data",
+          "request_id"
+        ],
+        "title": "Envelope[ModelStatus]"
+      },
+      "Envelope_Reply_": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/Reply"
+          },
+          "request_id": {
+            "type": "string",
+            "title": "Request Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data",
+          "request_id"
+        ],
+        "title": "Envelope[Reply]"
+      },
+      "Envelope_SessionCreated_": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/SessionCreated"
+          },
+          "request_id": {
+            "type": "string",
+            "title": "Request Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data",
+          "request_id"
+        ],
+        "title": "Envelope[SessionCreated]"
+      },
+      "Envelope_SessionState_": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/SessionState"
+          },
+          "request_id": {
+            "type": "string",
+            "title": "Request Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data",
+          "request_id"
+        ],
+        "title": "Envelope[SessionState]"
+      },
+      "Envelope_SpeechProbe_": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/SpeechProbe"
+          },
+          "request_id": {
+            "type": "string",
+            "title": "Request Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data",
+          "request_id"
+        ],
+        "title": "Envelope[SpeechProbe]"
+      },
+      "Envelope_SpeechStatus_": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/SpeechStatus"
+          },
+          "request_id": {
+            "type": "string",
+            "title": "Request Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data",
+          "request_id"
+        ],
+        "title": "Envelope[SpeechStatus]"
+      },
+      "Envelope_VoiceTranscription_": {
+        "properties": {
+          "data": {
+            "$ref": "#/components/schemas/VoiceTranscription"
+          },
+          "request_id": {
+            "type": "string",
+            "title": "Request Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data",
+          "request_id"
+        ],
+        "title": "Envelope[VoiceTranscription]"
+      },
+      "Envelope_list_ItemAdmin__": {
+        "properties": {
+          "data": {
+            "items": {
+              "$ref": "#/components/schemas/ItemAdmin"
+            },
+            "type": "array",
+            "title": "Data"
+          },
+          "request_id": {
+            "type": "string",
+            "title": "Request Id"
+          }
+        },
+        "type": "object",
+        "required": [
+          "data",
+          "request_id"
+        ],
+        "title": "Envelope[list[ItemAdmin]]"
+      },
+      "HTTPValidationError": {
+        "properties": {
+          "detail": {
+            "items": {
+              "$ref": "#/components/schemas/ValidationError"
+            },
+            "type": "array",
+            "title": "Detail"
+          }
+        },
+        "type": "object",
+        "title": "HTTPValidationError"
+      },
+      "HealthOutput": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status"
+          },
+          "version": {
+            "type": "string",
+            "title": "Version"
+          },
+          "llm_mode": {
+            "type": "string",
+            "title": "Llm Mode"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status",
+          "version",
+          "llm_mode"
+        ],
+        "title": "HealthOutput"
+      },
+      "HotspotInput": {
+        "properties": {
+          "key": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9_-]{1,64}$",
+            "title": "Key"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 6000,
+            "minLength": 1,
+            "title": "Description"
+          },
+          "action_type": {
+            "type": "string",
+            "enum": [
+              "highlight",
+              "play_animation",
+              "show_steps"
+            ],
+            "title": "Action Type",
+            "default": "highlight"
+          },
+          "action_target": {
+            "type": "string",
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Action Target"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "key",
+          "name",
+          "description",
+          "action_target"
+        ],
+        "title": "HotspotInput"
+      },
+      "InteractionInput": {
+        "properties": {
+          "event": {
+            "type": "string",
+            "enum": [
+              "explain",
+              "hotspot",
+              "ask"
+            ],
+            "title": "Event"
+          },
+          "item_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[a-zA-Z0-9_-]{1,64}$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Item Id"
+          },
+          "hotspot_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[a-zA-Z0-9_-]{1,64}$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Hotspot Id"
+          },
+          "question": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2000,
+                "minLength": 1
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Question"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "event"
+        ],
+        "title": "InteractionInput"
+      },
+      "ItemAdmin": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "category": {
+            "type": "string",
+            "title": "Category"
+          },
+          "region": {
+            "type": "string",
+            "title": "Region"
+          },
+          "summary": {
+            "type": "string",
+            "title": "Summary"
+          },
+          "introduction": {
+            "type": "string",
+            "title": "Introduction"
+          },
+          "image_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Image Url"
+          },
+          "is_demo": {
+            "type": "boolean",
+            "title": "Is Demo"
+          },
+          "hotspots": {
+            "items": {
+              "$ref": "#/components/schemas/HotspotInput"
+            },
+            "type": "array",
+            "title": "Hotspots"
+          },
+          "published": {
+            "type": "boolean",
+            "title": "Published"
+          },
+          "knowledge": {
+            "items": {
+              "$ref": "#/components/schemas/KnowledgeInput"
+            },
+            "type": "array",
+            "title": "Knowledge"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "category",
+          "region",
+          "summary",
+          "introduction",
+          "image_url",
+          "is_demo",
+          "hotspots",
+          "published",
+          "knowledge"
+        ],
+        "title": "ItemAdmin"
+      },
+      "ItemInput": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-zA-Z0-9_-]{1,64}$",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Name"
+          },
+          "category": {
+            "type": "string",
+            "maxLength": 80,
+            "minLength": 1,
+            "title": "Category"
+          },
+          "region": {
+            "type": "string",
+            "maxLength": 120,
+            "title": "Region",
+            "default": ""
+          },
+          "summary": {
+            "type": "string",
+            "maxLength": 1500,
+            "minLength": 1,
+            "title": "Summary"
+          },
+          "introduction": {
+            "type": "string",
+            "maxLength": 12000,
+            "minLength": 1,
+            "title": "Introduction"
+          },
+          "image_url": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2083,
+                "minLength": 1,
+                "format": "uri"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Image Url"
+          },
+          "published": {
+            "type": "boolean",
+            "title": "Published",
+            "default": false
+          },
+          "is_demo": {
+            "type": "boolean",
+            "title": "Is Demo",
+            "default": false
+          },
+          "hotspots": {
+            "items": {
+              "$ref": "#/components/schemas/HotspotInput"
+            },
+            "type": "array",
+            "maxItems": 30,
+            "title": "Hotspots"
+          },
+          "knowledge": {
+            "items": {
+              "$ref": "#/components/schemas/KnowledgeInput"
+            },
+            "type": "array",
+            "maxItems": 50,
+            "title": "Knowledge"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "category",
+          "summary",
+          "introduction"
+        ],
+        "title": "ItemInput"
+      },
+      "ItemPage": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/ItemPublic"
+            },
+            "type": "array",
+            "title": "Items"
+          },
+          "total": {
+            "type": "integer",
+            "title": "Total"
+          },
+          "page": {
+            "type": "integer",
+            "title": "Page"
+          },
+          "page_size": {
+            "type": "integer",
+            "title": "Page Size"
+          }
+        },
+        "type": "object",
+        "required": [
+          "items",
+          "total",
+          "page",
+          "page_size"
+        ],
+        "title": "ItemPage"
+      },
+      "ItemPublic": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "category": {
+            "type": "string",
+            "title": "Category"
+          },
+          "region": {
+            "type": "string",
+            "title": "Region"
+          },
+          "summary": {
+            "type": "string",
+            "title": "Summary"
+          },
+          "introduction": {
+            "type": "string",
+            "title": "Introduction"
+          },
+          "image_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Image Url"
+          },
+          "is_demo": {
+            "type": "boolean",
+            "title": "Is Demo"
+          },
+          "hotspots": {
+            "items": {
+              "$ref": "#/components/schemas/HotspotInput"
+            },
+            "type": "array",
+            "title": "Hotspots"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "name",
+          "category",
+          "region",
+          "summary",
+          "introduction",
+          "image_url",
+          "is_demo",
+          "hotspots"
+        ],
+        "title": "ItemPublic"
+      },
+      "KnowledgeInput": {
+        "properties": {
+          "title": {
+            "type": "string",
+            "maxLength": 160,
+            "minLength": 1,
+            "title": "Title"
+          },
+          "content": {
+            "type": "string",
+            "maxLength": 12000,
+            "minLength": 1,
+            "title": "Content"
+          },
+          "source_name": {
+            "type": "string",
+            "maxLength": 200,
+            "minLength": 1,
+            "title": "Source Name"
+          },
+          "source_url": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 2083,
+                "minLength": 1,
+                "format": "uri"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Url"
+          },
+          "reviewed": {
+            "type": "boolean",
+            "title": "Reviewed",
+            "default": false
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "title",
+          "content",
+          "source_name"
+        ],
+        "title": "KnowledgeInput"
+      },
+      "LoginInput": {
+        "properties": {
+          "username": {
+            "type": "string",
+            "maxLength": 120,
+            "minLength": 1,
+            "title": "Username"
+          },
+          "password": {
+            "type": "string",
+            "maxLength": 300,
+            "minLength": 1,
+            "title": "Password"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "username",
+          "password"
+        ],
+        "title": "LoginInput"
+      },
+      "LoginOutput": {
+        "properties": {
+          "access_token": {
+            "type": "string",
+            "title": "Access Token"
+          },
+          "token_type": {
+            "type": "string",
+            "const": "bearer",
+            "title": "Token Type"
+          },
+          "expires_in": {
+            "type": "integer",
+            "title": "Expires In"
+          }
+        },
+        "type": "object",
+        "required": [
+          "access_token",
+          "token_type",
+          "expires_in"
+        ],
+        "title": "LoginOutput"
+      },
+      "ModelConfigInput": {
+        "properties": {
+          "provider": {
+            "type": "string",
+            "enum": [
+              "chat_completions",
+              "dify"
+            ],
+            "title": "Provider",
+            "default": "chat_completions"
+          },
+          "api_base_url": {
+            "type": "string",
+            "maxLength": 2083,
+            "minLength": 1,
+            "format": "uri",
+            "title": "Api Base Url"
+          },
+          "model": {
+            "type": "string",
+            "maxLength": 120,
+            "title": "Model",
+            "default": ""
+          },
+          "api_key": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "password",
+                "writeOnly": true
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Api Key"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "required": [
+          "api_base_url"
+        ],
+        "title": "ModelConfigInput"
+      },
+      "ModelProbe": {
+        "properties": {
+          "connected": {
+            "type": "boolean",
+            "title": "Connected"
+          },
+          "reply": {
+            "type": "string",
+            "title": "Reply"
+          },
+          "latency_ms": {
+            "type": "integer",
+            "title": "Latency Ms"
+          },
+          "usage": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Usage"
+          }
+        },
+        "type": "object",
+        "required": [
+          "connected",
+          "reply",
+          "latency_ms",
+          "usage"
+        ],
+        "title": "ModelProbe"
+      },
+      "ModelStatus": {
+        "properties": {
+          "mode": {
+            "type": "string",
+            "enum": [
+              "demo",
+              "live"
+            ],
+            "title": "Mode"
+          },
+          "provider": {
+            "type": "string",
+            "enum": [
+              "chat_completions",
+              "dify"
+            ],
+            "title": "Provider"
+          },
+          "api_base_url": {
+            "type": "string",
+            "title": "Api Base Url"
+          },
+          "model": {
+            "type": "string",
+            "title": "Model"
+          },
+          "key_configured": {
+            "type": "boolean",
+            "title": "Key Configured"
+          },
+          "verification": {
+            "type": "string",
+            "enum": [
+              "unverified",
+              "verified",
+              "failed"
+            ],
+            "title": "Verification"
+          },
+          "config_writable": {
+            "type": "boolean",
+            "title": "Config Writable"
+          },
+          "last_error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Error"
+          }
+        },
+        "type": "object",
+        "required": [
+          "mode",
+          "provider",
+          "api_base_url",
+          "model",
+          "key_configured",
+          "verification",
+          "config_writable",
+          "last_error"
+        ],
+        "title": "ModelStatus"
+      },
+      "Reply": {
+        "properties": {
+          "request_id": {
+            "type": "string",
+            "title": "Request Id"
+          },
+          "message_id": {
+            "type": "string",
+            "title": "Message Id"
+          },
+          "text": {
+            "type": "string",
+            "title": "Text"
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "demo",
+              "live",
+              "fallback"
+            ],
+            "title": "Mode"
+          },
+          "actions": {
+            "items": {
+              "$ref": "#/components/schemas/Action"
+            },
+            "type": "array",
+            "title": "Actions"
+          },
+          "session": {
+            "$ref": "#/components/schemas/SessionState"
+          },
+          "usage": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Usage"
+          },
+          "sources": {
+            "items": {
+              "$ref": "#/components/schemas/SourceReference"
+            },
+            "type": "array",
+            "title": "Sources"
+          },
+          "suggestions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Suggestions"
+          },
+          "warning": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Warning"
+          },
+          "provider_error": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Provider Error"
+          }
+        },
+        "type": "object",
+        "required": [
+          "request_id",
+          "message_id",
+          "text",
+          "mode",
+          "actions",
+          "session",
+          "usage",
+          "sources",
+          "suggestions",
+          "warning",
+          "provider_error"
+        ],
+        "title": "Reply"
+      },
+      "SessionCreated": {
+        "properties": {
+          "session": {
+            "$ref": "#/components/schemas/SessionState"
+          },
+          "session_token": {
+            "type": "string",
+            "title": "Session Token"
+          }
+        },
+        "type": "object",
+        "required": [
+          "session",
+          "session_token"
+        ],
+        "title": "SessionCreated"
+      },
+      "SessionInput": {
+        "properties": {
+          "item_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[a-zA-Z0-9_-]{1,64}$"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Item Id"
+          },
+          "audience": {
+            "type": "string",
+            "enum": [
+              "general",
+              "children",
+              "expert"
+            ],
+            "title": "Audience",
+            "default": "general"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "SessionInput"
+      },
+      "SessionState": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "current_item_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Current Item Id"
+          },
+          "current_hotspot_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Current Hotspot Id"
+          },
+          "audience": {
+            "type": "string",
+            "enum": [
+              "general",
+              "children",
+              "expert"
+            ],
+            "title": "Audience"
+          },
+          "turn_count": {
+            "type": "integer",
+            "title": "Turn Count"
+          },
+          "revision": {
+            "type": "integer",
+            "title": "Revision"
+          },
+          "expires_at": {
+            "type": "string",
+            "title": "Expires At"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "current_item_id",
+          "current_hotspot_id",
+          "audience",
+          "turn_count",
+          "revision",
+          "expires_at"
+        ],
+        "title": "SessionState"
+      },
+      "SourceReference": {
+        "properties": {
+          "id": {
+            "type": "string",
+            "title": "Id"
+          },
+          "title": {
+            "type": "string",
+            "title": "Title"
+          },
+          "source_name": {
+            "type": "string",
+            "title": "Source Name"
+          },
+          "source_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source Url"
+          },
+          "is_demo": {
+            "type": "boolean",
+            "title": "Is Demo"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "source_name",
+          "source_url",
+          "is_demo"
+        ],
+        "title": "SourceReference"
+      },
+      "SpeechConfigInput": {
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "title": "Enabled",
+            "default": true
+          },
+          "api_key": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "password",
+                "writeOnly": true
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Api Key"
+          },
+          "voice": {
+            "type": "string",
+            "enum": [
+              "alex",
+              "benjamin",
+              "charles",
+              "david",
+              "anna",
+              "bella"
+            ],
+            "title": "Voice",
+            "default": "anna"
+          }
+        },
+        "additionalProperties": false,
+        "type": "object",
+        "title": "SpeechConfigInput"
+      },
+      "SpeechProbe": {
+        "properties": {
+          "audio_base64": {
+            "type": "string",
+            "title": "Audio Base64"
+          },
+          "mime_type": {
+            "type": "string",
+            "title": "Mime Type"
+          },
+          "first_byte_ms": {
+            "type": "integer",
+            "title": "First Byte Ms"
+          },
+          "total_ms": {
+            "type": "integer",
+            "title": "Total Ms"
+          }
+        },
+        "type": "object",
+        "required": [
+          "audio_base64",
+          "mime_type",
+          "first_byte_ms",
+          "total_ms"
+        ],
+        "title": "SpeechProbe"
+      },
+      "SpeechStatus": {
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "title": "Enabled"
+          },
+          "key_configured": {
+            "type": "boolean",
+            "title": "Key Configured"
+          },
+          "voice": {
+            "type": "string",
+            "title": "Voice"
+          },
+          "model": {
+            "type": "string",
+            "title": "Model"
+          },
+          "config_writable": {
+            "type": "boolean",
+            "title": "Config Writable"
+          },
+          "recognition_enabled": {
+            "type": "boolean",
+            "title": "Recognition Enabled",
+            "default": false
+          }
+        },
+        "type": "object",
+        "required": [
+          "enabled",
+          "key_configured",
+          "voice",
+          "model",
+          "config_writable"
+        ],
+        "title": "SpeechStatus"
+      },
+      "ValidationError": {
+        "properties": {
+          "loc": {
+            "items": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "integer"
+                }
+              ]
+            },
+            "type": "array",
+            "title": "Location"
+          },
+          "msg": {
+            "type": "string",
+            "title": "Message"
+          },
+          "type": {
+            "type": "string",
+            "title": "Error Type"
+          },
+          "input": {
+            "title": "Input"
+          },
+          "ctx": {
+            "type": "object",
+            "title": "Context"
+          }
+        },
+        "type": "object",
+        "required": [
+          "loc",
+          "msg",
+          "type"
+        ],
+        "title": "ValidationError"
+      },
+      "VoiceTranscription": {
+        "properties": {
+          "text": {
+            "type": "string",
+            "title": "Text"
+          },
+          "command": {
+            "anyOf": [
+              {
+                "type": "string",
+                "enum": [
+                  "audio_pause",
+                  "audio_resume",
+                  "audio_repeat",
+                  "audio_stop"
+                ]
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Command"
+          },
+          "latency_ms": {
+            "type": "integer",
+            "title": "Latency Ms"
+          }
+        },
+        "type": "object",
+        "required": [
+          "text",
+          "command",
+          "latency_ms"
+        ],
+        "title": "VoiceTranscription"
+      }
+    }
+  }
+}

@@ -33,6 +33,8 @@ let onResume = () => {};
 const labels = new Map();
 
 export const getLandscape = () => land;
+// 承艺之声据此判断参观者在看哪里
+export const getFocus = () => ({ level, region, craft });
 
 // —— 地点题签 ——
 function buildPoints() {

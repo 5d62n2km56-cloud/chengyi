@@ -12,7 +12,7 @@
 </head>
 <body>
 <!-- 自动走一遍主流程：山河 → 产地 → 工坊入口 → 创作 → 对话 → 册页 → 入窑 → 完成 → 作品照片 → 删除 → 剪纸 → AI 不可用兜底 -->
-<iframe id="app" src="../index.html#explore"></iframe>
+<iframe id="app" src="../index.html?ai=off#explore"></iframe>
 <pre id="log"></pre>
 <script>
 const log = document.getElementById('log');
@@ -165,6 +165,48 @@ async function run() {
   click(doc.querySelector('[data-view="explore"]'));
   await wait(400);
   check('返回山河', visible($('explore-view')));
+
+  // 大模型后台：用假的 fetch 模拟 SSE，不依赖真实后台和网络
+  const requests = [];
+  let streamFails = false;
+  const sse = frames => frames.map(([e, d]) => `event: ${e}\ndata: ${JSON.stringify(d)}\n\n`).join('');
+  win.fetch = async (url, opts = {}) => {
+    const json = (body, status = 200) => new win.Response(JSON.stringify(body), { status, headers: { 'Content-Type': 'application/json' } });
+    if (url.endsWith('/health')) return json({ data: { status: 'ok' } });
+    if (url.endsWith('/sessions')) return json({ data: { session: { id: 's1' }, session_token: 't1' } }, 201);
+    requests.push(JSON.parse(opts.body));
+    if (streamFails) return json({ error: { code: 'http_503' } }, 503);
+    return new win.Response(sse([
+      ['start', {}], ['delta', { text: '青花的蓝，' }], ['delta', { text: '来自钴料。' }],
+      ['result', { text: '青花的蓝，来自钴料。', mode: 'live', sources: [
+        { id: 'overview:x', title: '场景说明' }, { id: 'dify:d1', title: '陶瓷工艺介绍.docx' }] }],
+    ]), { headers: { 'Content-Type': 'text/event-stream' } });
+  };
+  // 在应用自己的页面里取同一个模块实例（绝对地址，避免按测试页路径解析）
+  const ai = await win.eval(`import("${new win.URL('js/ai/backend.js', win.location.href).href}")`);
+  ai.configure({ enabled: true });
+
+  pointerTap(doc.querySelector('[data-region="江西"]'));
+  await wait(300);
+  if ($('chat-panel').hidden) click($('voice-toggle'));
+  check('承艺之声：山河里也能打开', visible($('chat-panel')) && $('messages').textContent.includes('江西'));
+  m = await chat('景德镇的瓷器有什么特别？');
+  check('大模型回答：流式文字 + 知识库来源', m?.textContent.includes('来自钴料') && m.querySelector('.kb-source')?.textContent.includes('陶瓷工艺介绍') && !m.textContent.includes('场景说明'));
+  check('大模型提问带上产地条目', requests.at(-1)?.item_id === 'chengyi-jiangxi-ceramic', requests.at(-1)?.item_id);
+  check('后台可用时说明大模型作答', $('chat-disclaimer').textContent.includes('大模型'));
+
+  click(doc.querySelector('[data-view="workshop"]'));
+  await wait(400);
+  if (!visible($('work-layout'))) { click(doc.querySelector('[data-hotspot="start"]')); await wait(500); }
+  const asked = requests.length;
+  m = await chat('换成云纹');
+  check('改作品仍走规则、不问大模型', !!m?.querySelector('[data-apply]') && requests.length === asked);
+  m = await chat('剪纸为什么要对折');
+  check('创作台提问带上作品状态', requests.at(-1)?.item_id === 'chengyi-paper' && requests.at(-1)?.question.startsWith('【参观者正在剪纸工坊创作'), requests.at(-1)?.question.slice(0, 30));
+  streamFails = true;
+  m = await chat('剪纸为什么要对折');
+  check('后台出错时退回册页回答', !!m?.querySelector('.ai-note') && !!m.querySelector('[data-cite]'));
+  ai.configure({ enabled: false });
 
   check('无运行时错误', errors.length === 0, errors.join(' | '));
   const passed = results.filter(Boolean).length;

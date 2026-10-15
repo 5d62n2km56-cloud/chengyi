@@ -1,10 +1,10 @@
 // 共创工坊：工坊入口 → 创作台。两者共用一个写实摄影棚，器物始终是画面的主角。
-// 入口只有一段介绍和三个选择；创作台只露出当前工序要用的工具，承艺之声收在右下角，需要时再展开。
+// 入口只有一段介绍和三个选择；创作台只露出当前工序要用的工具。承艺之声在 voice.js，这里只响应它的展开与收起。
 
-import { $, $$, esc, toast } from '../core/dom.js';
+import { $, esc, toast } from '../core/dom.js';
 import { emit, on } from '../core/bus.js';
 import { currentView, showView } from '../core/router.js';
-import { get, reducedMotion } from '../core/settings.js';
+import { reducedMotion } from '../core/settings.js';
 import * as session from '../core/session.js';
 import { findRecord, storageAvailable } from '../core/store.js';
 import { CRAFTS, CRAFT_NAMES, PATTERNS, STEP_COUNT, colorOf } from '../data/crafts.js';
@@ -13,14 +13,12 @@ import { ATELIER_TOOLS } from '../data/atelier.js';
 import { createStudio } from '../render/studio.js';
 import { artwork } from '../render/artwork.js';
 import { fillPhoto } from '../render/photo.js';
-import { respond, quickOptions } from '../ai/assistant.js';
 import { play } from '../fx/sound.js';
 import { confirmAction } from './dialogs.js';
 
 let mode = 'atelier';
 let region = null;
 let studio = null;
-let busy = false;
 
 const craftNow = () => session.getActiveCraft();
 const findRecordName = id => findRecord(id)?.name || null;
@@ -46,11 +44,9 @@ function showMode() {
     studio.compose(mode === 'atelier' ? 'intro' : $('chat-panel').hidden ? 'create' : 'chat', { immediate: !visible });
     studio.show(craftNow(), session.getSession().state);
   } else syncFallback(session.getSession().state);
+  $('work-layout').classList.toggle('chat-open', !$('chat-panel').hidden);
   if (mode === 'atelier') renderAtelier();
-  else {
-    renderWork();
-    renderChat();
-  }
+  else renderWork();
 }
 
 export function openAtelier(craft, regionName) {
@@ -84,7 +80,7 @@ function renderAtelier() {
   closeCard();
 }
 
-const citeButton = (craft, id, label) => {
+export const citeButton = (craft, id, label) => {
   const found = findParagraph(craft, id);
   if (!found) return '';
   return `<button class="cite" data-cite="${id}" data-cite-craft="${craft}">${label || `出处：${esc(SOURCES[found.para.src]?.title.split('，')[0] || '册页')}`}</button>`;
@@ -186,83 +182,11 @@ function syncFallback(state) {
   img.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(artwork(craftNow(), state))}`;
 }
 
-// —— 承艺之声 ——
-const ORB_LABEL = { idle: '在这儿，等你开口', thinking: '正在理解…', done: '好了', error: '暂时休息，可以用快捷选项继续' };
-let orbTimer;
-function setOrb(state) {
-  clearTimeout(orbTimer);
-  $('orb').dataset.state = state;
-  $('orb-label').textContent = ORB_LABEL[state];
-  if (state === 'done') orbTimer = setTimeout(() => setOrb('idle'), 1400);
-}
-
-function setChat(open) {
-  $('chat-panel').hidden = !open;
-  studio?.compose(open ? 'chat' : 'create');
+// 承艺之声展开时，器物让到左边
+function onChat({ open }) {
+  if (currentView() !== 'workshop') return;
   $('work-layout').classList.toggle('chat-open', open);
-  $('voice-toggle').setAttribute('aria-expanded', String(open));
-  if (open) {
-    $('messages').scrollTop = $('messages').scrollHeight;
-    $('chat-input').focus({ preventScroll: true });
-  }
-}
-
-function renderChat() {
-  const craft = craftNow();
-  const c = CRAFTS[craft];
-  const ss = session.getSession();
-  if (!ss.messages.length) session.addMessage('ai', c.greeting);
-  $('messages').innerHTML = ss.messages.map((m, i) => {
-    if (m.role === 'user') return `<div class="message user"><span>${esc(m.text)}</span></div>`;
-    const cites = (m.cite || []).map(x => citeButton(x.craft, x.id)).join('');
-    const proposal = m.proposal
-      ? `<div class="proposal"><span>${esc(m.proposal.summary)}</span>${m.proposal.applied
-        ? '<span class="applied">已应用到作品，可以撤销</span>'
-        : `<button class="secondary" data-apply="${i}">应用建议，看看效果</button>`}</div>`
-      : '';
-    const quick = m.quick
-      ? `<div class="quick">${m.quick.map((q, j) => `<button data-quick="${i}:${j}">${esc(q.label)}</button>`).join('')}${m.retry ? `<button data-retry="${i}">重新尝试</button>` : ''}</div>`
-      : '';
-    const albumLink = m.openAlbum ? '<div class="cites"><button class="cite" data-open-album>翻翻册页</button></div>' : '';
-    return `<div class="message ai ${m.error ? 'error' : ''}"><strong>承艺之声${m.error ? ' · 暂时休息' : ''}</strong><span>${esc(m.text)}</span>${cites ? `<div class="cites">${cites}</div>` : ''}${albumLink}${proposal}${quick}</div>`;
-  }).join('');
-  $('messages').scrollTop = $('messages').scrollHeight;
-  $('chat-prompts').innerHTML = c.prompts.map(x => `<button data-prompt="${esc(x)}">${esc(x)}</button>`).join('');
-  $('chat-input').placeholder = c.placeholder;
-}
-
-export function sendPrompt(text) {
-  const clean = text.trim();
-  if (!clean || busy) return;
-  busy = true;
-  session.addMessage('user', clean);
-  $('chat-input').value = '';
-  renderChat();
-  setOrb('thinking');
-  const craft = craftNow();
-  setTimeout(() => {
-    busy = false;
-    if (craftNow() !== craft) return;
-    const state = session.getSession().state;
-    if (get('aiDown') === 'on') {
-      session.addMessage('ai', '师傅暂时休息了，先用下面的快捷选项或手动工具继续，作品不受影响。', {
-        error: true, quick: quickOptions(craft, state), retry: clean,
-      });
-      setOrb('error');
-      play('error');
-    } else {
-      const r = respond(clean, craft, state);
-      session.addMessage('ai', r.reply, {
-        proposal: r.proposal || null,
-        cite: r.cite,
-        quick: r.quick ? quickOptions(craft, state) : null,
-        openAlbum: r.openAlbum,
-      });
-      setOrb('done');
-      play('tap');
-    }
-    renderChat();
-  }, reducedMotion() ? 120 : 650);
+  studio?.compose(mode === 'atelier' ? 'intro' : open ? 'chat' : 'create');
 }
 
 // —— 初始化 ——
@@ -283,7 +207,7 @@ export function initWorkshop() {
   });
   $('atelier-card-close').addEventListener('click', closeCard);
   $('atelier-back').addEventListener('click', () => showView('explore'));
-  $('back-atelier').addEventListener('click', () => { setChat(false); mode = 'atelier'; showMode(); });
+  $('back-atelier').addEventListener('click', () => { emit('chat-close'); mode = 'atelier'; showMode(); });
   ['atelier-craft-switch', 'work-craft-switch'].forEach(id => $(id).addEventListener('click', e => {
     const b = e.target.closest('[data-craft]');
     if (!b || b.dataset.craft === craftNow()) return;
@@ -336,8 +260,7 @@ export function initWorkshop() {
     if (s.step >= STEP_COUNT - 1) return;
     session.commit({ step: s.step + 1 });
     const craft = craftNow();
-    session.addMessage('ai', CRAFTS[craft].copy[s.step + 1], { cite: [{ craft, id: CRAFTS[craft].steps[s.step + 1].album }] });
-    renderChat();
+    emit('voice-note', { craft, text: CRAFTS[craft].copy[s.step + 1], cite: [{ craft, id: CRAFTS[craft].steps[s.step + 1].album }] });
   });
   $('process-album').addEventListener('click', () => {
     const craft = craftNow();
@@ -374,45 +297,8 @@ export function initWorkshop() {
   });
   $('work-name').addEventListener('input', () => $('work-name').setCustomValidity(''));
 
-  // 对话
-  $('voice-toggle').addEventListener('click', () => setChat(true));
-  $('chat-close').addEventListener('click', () => setChat(false));
-  $('chat-form').addEventListener('submit', e => { e.preventDefault(); sendPrompt($('chat-input').value); });
-  $('chat-prompts').addEventListener('click', e => {
-    const b = e.target.closest('[data-prompt]');
-    if (b) sendPrompt(b.dataset.prompt);
-  });
-  $('messages').addEventListener('click', e => {
-    const ss = session.getSession();
-    const apply = e.target.closest('[data-apply]');
-    if (apply) {
-      const msg = ss.messages[Number(apply.dataset.apply)];
-      if (!msg?.proposal || msg.proposal.applied) return;
-      if (msg.proposal.kind === 'undo') session.undo();
-      else if (!session.commit(msg.proposal.patch)) toast('当前作品已符合这组设置');
-      msg.proposal.applied = true;
-      play('confirm');
-      renderChat();
-      return;
-    }
-    const quick = e.target.closest('[data-quick]');
-    if (quick) {
-      const [mi, qi] = quick.dataset.quick.split(':').map(Number);
-      const option = ss.messages[mi]?.quick?.[qi];
-      if (option && session.commit(option.patch)) {
-        session.addMessage('ai', `已按「${option.label}」修改，可以撤销。`);
-        renderChat();
-      }
-      return;
-    }
-    const retry = e.target.closest('[data-retry]');
-    if (retry) sendPrompt(ss.messages[Number(retry.dataset.retry)].retry);
-  });
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Escape' && !$('chat-panel').hidden && !document.querySelector('dialog[open]')) setChat(false);
-  });
-
   // 状态联动
+  on('chat', onChat);
   on('work', ({ animate }) => {
     if (currentView() !== 'workshop') return;
     if (mode === 'create') renderWork();

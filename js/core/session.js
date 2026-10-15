@@ -1,5 +1,5 @@
 // 工坊会话：每个品类一件进行中的作品。
-// 对话与手动操作都通过 commit() 修改作品，共享同一个撤销栈和自动保存（PRD E-01）。
+// 对话与手动操作都通过 commit() 修改作品，共享同一个撤销栈和自动保存（PRD E-01）。对话记录在 views/voice.js。
 
 import { CRAFTS, CRAFT_NAMES, clampState, defaultState, validState } from '../data/crafts.js';
 import { clone, makeId } from './dom.js';
@@ -21,7 +21,6 @@ function blankSession(craft, record) {
     id: record?.id || null,
     history: [],
     future: [],
-    messages: [],
   };
 }
 
@@ -110,12 +109,4 @@ export function redo() {
 // 拖动滑杆时的临时预览，不入撤销栈
 export function preview(patch) {
   emit('preview', clampState({ ...getSession().state, ...patch }));
-}
-
-export function addMessage(role, text, extra = {}) {
-  const ss = getSession();
-  const msg = { role, text, ...extra };
-  ss.messages.push(msg);
-  if (ss.messages.length > 40) ss.messages.shift();
-  return msg;
 }

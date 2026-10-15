@@ -1,2 +1,12 @@
 .DS_Store
 *.log
+
+# 讲解后台：密钥、本机数据和运行环境一律不进仓库（仓库是公开的）
+.env
+.local-credentials.txt
+.model-config-*
+server/data/
+.venv/
+__pycache__/
+.pytest_cache/
+*.pyc

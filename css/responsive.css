@@ -39,6 +39,7 @@
   .tool + .tool, .tray-actions { border-left: 0; padding-left: 0; }
   .save-status, .drag-hint { display: none; }
   .voice-pill { bottom: 16px; }
+  .shell:has(#explore-view:not([hidden]) #place-card:not([hidden])) .voice-pill { display: none; }
   .gallery-head { flex-direction: column; align-items: flex-start; }
   .start-tiles { grid-template-columns: 1fr 1fr; gap: 14px; }
   .photo-dialog[open] { grid-template-columns: 1fr; }

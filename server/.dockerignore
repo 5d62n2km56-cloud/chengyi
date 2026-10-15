@@ -1,0 +1,10 @@
+.venv
+.env
+.local-credentials.txt
+.model-config-*
+data
+tests
+__pycache__
+.pytest_cache
+*.log
+.git
