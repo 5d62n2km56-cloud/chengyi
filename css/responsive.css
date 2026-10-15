@@ -1,0 +1,47 @@
+/* 优先适配 1440×900，兼顾 1280×800；窄屏做可用的降级 */
+
+@media (max-height: 820px) and (min-width: 801px) {
+  :root { --topbar-h: 58px; --fs-hero: clamp(50px, 5.6vw, 84px); }
+  .reveal { aspect-ratio: 4 / 3.4; }
+  .atelier-intro h1 { font-size: 44px; }
+  .tray { bottom: 20px; }
+  .voice-pill { bottom: 22px; }
+}
+
+@media (max-width: 1180px) {
+  :root { --gutter: 24px; }
+  .topbar nav button { padding: 6px 12px; letter-spacing: 1px; }
+  .place-card { width: 320px; }
+  .tray { gap: 18px; padding-left: 18px; }
+  .tool + .tool { padding-left: 18px; }
+  #sculpt-slider { width: 110px; }
+  .steps .step span:not(.step-number) { display: none; }
+  .chat-panel, .sheet { width: 340px; }
+}
+
+@media (max-width: 800px) {
+  :root { --topbar-h: 56px; --gutter: 14px; --fs-hero: 46px; }
+  .topbar { grid-template-columns: auto 1fr auto; gap: 8px; }
+  .brand-name { display: none; }
+  .topbar nav { justify-self: center; }
+  .topbar nav button { font-size: 12px; padding: 5px 9px; }
+  #settings-button { display: none; }
+  .explore-more { flex-wrap: wrap; gap: 8px; }
+  .place-card { left: 12px; right: 12px; top: auto; bottom: 12px; width: auto; max-height: 62%; }
+  .reveal { aspect-ratio: 16 / 9; }
+  .atelier-intro { left: 16px; right: 16px; top: auto; bottom: 20px; width: auto; padding: 18px; background: var(--card); border-radius: 16px; }
+  .atelier-intro h1 { font-size: 32px; }
+  .sheet, .chat-panel { left: 12px; right: 12px; width: auto; top: auto; max-height: 70%; bottom: 12px; }
+  .work-top { flex-wrap: wrap; }
+  .steps { position: static; transform: none; order: 3; width: 100%; justify-content: center; }
+  .step-copy { display: none; }
+  .tray { left: 12px; right: 12px; transform: none; bottom: 80px; flex-wrap: wrap; white-space: normal; border-radius: 18px; gap: 12px; }
+  .tool + .tool, .tray-actions { border-left: 0; padding-left: 0; }
+  .save-status, .drag-hint { display: none; }
+  .voice-pill { bottom: 16px; }
+  .gallery-head { flex-direction: column; align-items: flex-start; }
+  .start-tiles { grid-template-columns: 1fr 1fr; gap: 14px; }
+  .photo-dialog[open] { grid-template-columns: 1fr; }
+  .dialog-photo { min-height: 220px; max-height: 300px; }
+  .op-title { letter-spacing: .16em; margin-right: -.16em; }
+}

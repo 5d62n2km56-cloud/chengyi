@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light">
+<title>承艺 · 山河入坊</title>
+<link rel="stylesheet" href="css/tokens.css">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/shell.css">
+<link rel="stylesheet" href="css/opening.css">
+<link rel="stylesheet" href="css/explore.css">
+<link rel="stylesheet" href="css/workshop.css">
+<link rel="stylesheet" href="css/gallery.css">
+<link rel="stylesheet" href="css/album.css">
+<link rel="stylesheet" href="css/dialogs.css">
+<link rel="stylesheet" href="css/responsive.css">
+<script type="importmap">
+{ "imports": { "three": "./js/vendor/three.module.min.js" } }
+</script>
+</head>
+<body>
+<!-- 山河：开场与山河寻艺共用的实时三维画面 -->
+<canvas class="world-canvas" id="world-canvas" aria-hidden="true"></canvas>
+
+<div class="shell" id="shell">
+
+<header class="topbar">
+  <button class="brand" id="brand-home" aria-label="承艺 · 回到山河"><span class="seal">承</span><span class="brand-name">承艺</span></button>
+  <nav aria-label="主要场景">
+    <button data-view="explore" aria-current="page">山河寻艺</button>
+    <button data-view="workshop">共创工坊</button>
+    <button data-view="gallery">我的作品</button>
+  </nav>
+  <div class="header-actions">
+    <button id="album-button">册页</button>
+    <div class="settings-wrap">
+      <button id="settings-button" aria-expanded="false" aria-controls="settings-pop" aria-label="设置">设置</button>
+      <div class="settings-pop" id="settings-pop" hidden>
+        <div class="setting"><span>声音</span><div class="seg" data-setting="sound"><button data-value="off">关</button><button data-value="on">开</button></div></div>
+        <div class="setting"><span>动态效果</span><div class="seg" data-setting="motion"><button data-value="full">完整</button><button data-value="reduced">减少</button></div></div>
+        <div class="setting"><span>模拟 AI 不可用</span><div class="seg" data-setting="aiDown"><button data-value="off">否</button><button data-value="on">是</button></div></div>
+        <div class="setting-actions">
+          <button id="replay-opening">重播开场</button>
+          <button id="reset-demo">重置演示数据</button>
+          <button id="about-button">原型说明</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<main class="main">
+
+<!-- 山河寻艺：总览 → 产地聚焦 → 工坊入口 -->
+<section class="view" id="explore-view" aria-label="山河寻艺" tabindex="-1">
+  <div class="map-viewport" id="map-viewport">
+    <div class="map-points" id="map-points"></div>
+  </div>
+
+  <div class="explore-intro" id="explore-intro">
+    <h1 class="explore-title">山河寻艺</h1>
+    <p class="explore-sub">点一处地名，寻一门手艺</p>
+    <div class="explore-more">
+      <select id="region-select" aria-label="按地区查找"></select>
+      <button class="text-btn" id="resume-work" hidden>继续上次的作品</button>
+    </div>
+  </div>
+
+  <nav class="map-trail" aria-label="当前层级"><ol id="map-trail"></ol></nav>
+
+  <aside class="place-card" id="place-card" aria-label="产地信息" hidden>
+    <button class="icon-btn place-close" id="place-close" aria-label="收起">×</button>
+    <div class="reveal" id="reveal">
+      <img class="reveal-img" id="reveal-img" alt="">
+      <p class="reveal-empty" id="reveal-empty" hidden>样品待收录</p>
+      <button class="reveal-hold" id="reveal-hold" aria-describedby="reveal-tip">
+        <svg viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="22" r="20"/><circle class="reveal-progress" cx="22" cy="22" r="20"/></svg>
+        <span>按住</span>
+      </button>
+      <span class="sr-only" id="reveal-tip">按住约 1 秒显现器物，或使用「直接看」</span>
+    </div>
+    <div class="place-body">
+      <p class="eyebrow" id="place-region">江西</p>
+      <h2 id="place-title">瓷器</h2>
+      <p class="place-item"><span id="place-item">景德镇手工制瓷技艺</span><span class="tag">示例 · 待核实</span></p>
+      <p class="place-desc" id="place-desc"></p>
+      <div class="sample-tabs" id="sample-tabs"></div>
+      <div class="place-actions">
+        <button class="primary-btn" id="enter-atelier" hidden>进入工坊</button>
+        <button class="text-btn" id="reveal-skip">直接看</button>
+        <button class="text-btn" id="place-album">翻阅册页</button>
+      </div>
+    </div>
+  </aside>
+</section>
+
+<!-- 共创工坊：工坊入口 → 创作台，共用一个写实摄影棚 -->
+<section class="view" id="workshop-view" aria-label="共创工坊" hidden tabindex="-1">
+  <canvas class="studio-canvas" id="studio-canvas" tabindex="0" aria-label="三维作品：拖动旋转，滚轮缩放，方向键旋转，Home 回正"></canvas>
+  <img class="studio-fallback" id="studio-fallback" alt="" hidden>
+
+  <div class="atelier" id="atelier">
+    <div class="atelier-intro">
+      <button class="back-link" id="atelier-back">← 山河</button>
+      <p class="eyebrow" id="atelier-trail">工坊</p>
+      <h1 id="atelier-title">瓷器工坊</h1>
+      <p class="atelier-lede" id="atelier-lede"></p>
+      <div class="atelier-actions">
+        <button class="primary-btn" data-hotspot="start">开始创作</button>
+        <button class="text-btn" data-hotspot="process">看工序</button>
+        <button class="text-btn" data-hotspot="tools">认识工具</button>
+      </div>
+      <div class="craft-switch" id="atelier-craft-switch" role="group" aria-label="切换工坊"></div>
+    </div>
+    <aside class="sheet" id="atelier-card" hidden>
+      <div class="sheet-head"><span class="eyebrow" id="atelier-card-eyebrow">看工序</span><button class="icon-btn" id="atelier-card-close" aria-label="关闭说明">×</button></div>
+      <h2 id="atelier-card-title"></h2>
+      <div class="sheet-body" id="atelier-card-body"></div>
+    </aside>
+  </div>
+
+  <div class="work" id="work-layout" hidden>
+    <div class="work-top">
+      <button class="back-link" id="back-atelier">← 工坊</button>
+      <div class="craft-switch" id="work-craft-switch" role="group" aria-label="切换品类"></div>
+      <ol class="steps" id="steps" aria-label="制作工序"></ol>
+      <div class="undo-row">
+        <button id="undo" disabled aria-label="撤销">撤销</button>
+        <button id="redo" disabled aria-label="重做">重做</button>
+        <button id="reset-work">重置</button>
+      </div>
+    </div>
+    <p class="step-copy"><span id="process-copy"></span><button class="cite" id="process-album">出处</button></p>
+
+    <div class="tray" id="tray" data-step="0" data-craft="ceramic">
+      <div class="tool" data-tool="shape"><span class="tool-label" id="shape-label">器型</span><div class="chips" id="shape-chips" role="group"></div></div>
+      <div class="tool" data-tool="slider"><label class="tool-label" for="sculpt-slider" id="slider-name">器身宽窄</label><input id="sculpt-slider" type="range" min="75" max="120" value="100"></div>
+      <div class="tool" data-tool="color"><span class="tool-label" id="color-label">釉色</span><div class="swatches" id="swatches" role="group" aria-label="选择作品颜色"></div></div>
+      <div class="tool" data-tool="pattern"><span class="tool-label">纹样</span><div class="chips" id="pattern-chips" role="group"></div></div>
+      <div class="tool" data-tool="final"><p class="tool-note" id="stage-under"></p></div>
+      <div class="tray-actions">
+        <button class="text-btn" id="next-step">下一步</button>
+        <button class="primary-btn" id="finish-work">完成作品</button>
+      </div>
+    </div>
+    <p class="save-status" id="save-status" role="status"></p>
+    <p class="drag-hint" id="drag-hint">拖动可旋转 · 滚轮远近</p>
+
+    <button class="voice-pill" id="voice-toggle" aria-expanded="false" aria-controls="chat-panel">
+      <span class="orb" id="orb" data-state="idle" aria-hidden="true"><i></i></span>
+      <span>问问承艺之声</span>
+    </button>
+    <aside class="chat-panel" id="chat-panel" aria-label="承艺之声" hidden>
+      <div class="chat-top">
+        <div><b>承艺之声</b><small id="orb-label">在这儿，等你开口</small></div>
+        <button class="icon-btn" id="chat-close" aria-label="收起对话">×</button>
+      </div>
+      <div class="messages" id="messages" role="log" aria-live="polite" aria-label="AI 对话"></div>
+      <div class="chat-prompts" id="chat-prompts"></div>
+      <form class="chat-form" id="chat-form">
+        <input id="chat-input" aria-label="告诉 AI 你的创作想法" maxlength="300" autocomplete="off">
+        <button type="submit" aria-label="发送">发送</button>
+      </form>
+      <p class="chat-disclaimer">规则演示，未接入真实模型 · 知识回答只引用册页</p>
+    </aside>
+  </div>
+</section>
+
+<!-- 我的作品 -->
+<section class="view" id="gallery-view" aria-label="我的作品" hidden tabindex="-1">
+  <div class="gallery-layout">
+    <header class="gallery-head">
+      <h1>我的作品</h1>
+      <div class="gallery-filters" role="group" aria-label="作品状态筛选">
+        <button data-filter="all" aria-pressed="true">全部</button>
+        <button data-filter="draft" aria-pressed="false">制作中</button>
+        <button data-filter="done" aria-pressed="false">已完成</button>
+      </div>
+    </header>
+    <div class="gallery-grid" id="gallery-grid"></div>
+    <p class="gallery-local">免登录原型 · 作品只保存在当前浏览器，可下载图片留存</p>
+  </div>
+</section>
+
+<div class="toast" id="toast" role="status"></div>
+</main>
+
+<!-- 承艺之声：需要时出现、几秒后淡去的一行旁白 -->
+<div class="guide-row" aria-label="承艺之声"><p id="guide-message" aria-live="polite"></p></div>
+</div>
+
+<!-- 开场：叠在山河之上 -->
+<section class="opening" id="opening" aria-label="开场" hidden>
+  <div class="opening-content">
+    <p class="op-brand"><span class="seal">承</span>承艺</p>
+    <h1 class="op-title">山河寻艺</h1>
+    <p class="op-line">千里江山之间，一手一艺，皆有来处</p>
+    <button class="op-start" id="opening-start">启程</button>
+  </div>
+  <div class="opening-tools">
+    <button id="opening-sound" aria-pressed="false">声音：关</button>
+    <button id="opening-skip">跳过</button>
+  </div>
+</section>
+
+<!-- 册页 -->
+<aside class="album" id="album" aria-label="册页" hidden>
+  <div class="album-head">
+    <div><p class="eyebrow">册页 · 科普与出处</p><h2 id="album-title">瓷器</h2><p class="album-lede" id="album-lede"></p></div>
+    <button class="icon-btn" id="album-close" aria-label="关闭册页">×</button>
+  </div>
+  <div class="album-crafts" id="album-crafts" role="group" aria-label="切换品类"></div>
+  <div class="album-tabs" id="album-tabs" role="tablist"></div>
+  <div class="album-body" id="album-body"></div>
+  <p class="album-note">示例文案 · 上线前需内容组逐条核验出处与素材授权</p>
+</aside>
+
+<dialog id="info-dialog"><div class="dialog-head"><h2 id="info-title">原型说明</h2><button data-close="info-dialog" aria-label="关闭">×</button></div><div class="dialog-body" id="info-body"></div><div class="dialog-actions"><button class="text-btn" data-close="info-dialog">知道了</button></div></dialog>
+
+<dialog id="finish-dialog" class="photo-dialog"><img class="dialog-photo" id="complete-art" alt=""><form id="finish-form"><div class="dialog-head"><h2>给它起个名字</h2><button type="button" data-close="finish-dialog" aria-label="关闭">×</button></div><div class="dialog-body"><label for="work-name">作品名称<input id="work-name" required maxlength="30" autocomplete="off"></label><p class="tiny">完成后仍可继续修改，作品保存在本机。</p></div><div class="dialog-actions"><button type="button" class="text-btn" data-close="finish-dialog">再改改</button><button type="submit" class="primary-btn">落款收藏</button></div></form></dialog>
+
+<dialog id="share-dialog" class="photo-dialog"><img class="dialog-photo" id="share-art" alt=""><div><div class="dialog-head"><h2>带它出门</h2><button data-close="share-dialog" aria-label="关闭">×</button></div><div class="dialog-body"><label for="share-copy">创作介绍<textarea id="share-copy"></textarea></label><p class="tiny">本原型不生成公开链接。</p></div><div class="dialog-actions"><button class="text-btn" id="copy-share">复制介绍</button><button class="primary-btn" id="export-png">下载图片</button></div></div></dialog>
+
+<dialog id="order-dialog"><div class="dialog-head"><h2>交给匠人，做成实物</h2><button data-close="order-dialog" aria-label="关闭">×</button></div><form id="order-form"><div class="dialog-body"><p>先形成制作需求，再由匠人确认可行性、方案、价格与周期。本原型只导出需求单，不提交订单，也不付款。</p><label for="order-size">希望的尺寸<input id="order-size" maxlength="80" required></label><label for="order-material">材料偏好<select id="order-material"></select></label><label for="order-note">给匠人的备注<textarea id="order-note" maxlength="500" placeholder="使用场景、细节要求，或可以接受的调整"></textarea></label><p class="tiny">数字效果是设计示意，颜色、结构与成品效果需匠人另行确认。</p></div><div class="dialog-actions"><button type="button" class="text-btn" data-close="order-dialog">稍后再说</button><button type="submit" class="primary-btn">导出需求单</button></div></form></dialog>
+
+<dialog id="confirm-dialog"><div class="dialog-head"><h2 id="confirm-title">确认</h2><button data-close="confirm-dialog" aria-label="关闭">×</button></div><div class="dialog-body"><p id="confirm-body"></p></div><div class="dialog-actions"><button class="text-btn" data-close="confirm-dialog">取消</button><button class="primary-btn" id="confirm-ok">确认</button></div></dialog>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>

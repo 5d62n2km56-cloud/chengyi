@@ -1,0 +1,32 @@
+dialog {
+  color: var(--ink);
+  background: var(--card-solid);
+  border: 0;
+  padding: 28px 30px;
+  width: 520px;
+  max-width: min(620px, calc(100vw - 32px));
+  max-height: 88dvh;
+  overflow: auto;
+  border-radius: 18px;
+  box-shadow: 0 30px 90px rgba(40, 30, 20, .28);
+}
+dialog::backdrop { background: rgba(60, 50, 40, .28); backdrop-filter: blur(8px); }
+dialog[open] { animation: arrive 260ms var(--ease-out); }
+.dialog-head { display: flex; justify-content: space-between; align-items: center; gap: 15px; margin-bottom: 12px; }
+.dialog-head h2 { font-size: 24px; letter-spacing: 4px; }
+.dialog-head button { min-height: 30px; padding: 2px 8px; font-size: 20px; color: var(--ink-3); }
+.dialog-body { font-size: 13px; color: var(--ink-2); line-height: 1.95; }
+.dialog-body h3 { font-size: 17px; color: var(--ink); margin: 20px 0 4px; letter-spacing: 2px; }
+.dialog-body ul { padding-left: 18px; }
+.dialog-body label { display: grid; gap: 4px; font-size: var(--fs-tiny); letter-spacing: 2px; color: var(--ink-3); margin: 14px 0; }
+.dialog-body input, .dialog-body textarea, .dialog-body select { width: 100%; font-size: 15px; letter-spacing: .5px; color: var(--ink); }
+.dialog-body textarea { min-height: 96px; resize: vertical; line-height: 1.8; }
+.dialog-body input:focus-visible, .dialog-body textarea:focus-visible, .dialog-body select:focus-visible { outline: none; border-bottom-color: var(--ink); }
+.dialog-actions { display: flex; justify-content: flex-end; align-items: center; gap: 16px; margin-top: 20px; flex-wrap: wrap; }
+
+/* 带作品照片的浮层：左图右文 */
+.photo-dialog { width: 820px; max-width: calc(100vw - 32px); padding: 0; overflow: hidden; }
+.photo-dialog[open] { display: grid; grid-template-columns: 1fr 1fr; }
+.dialog-photo { width: 100%; height: 100%; min-height: 420px; object-fit: cover; background: #e8e1d6; display: block; }
+.photo-dialog > form, .photo-dialog > div { padding: 30px 32px; display: flex; flex-direction: column; }
+.photo-dialog .dialog-actions { margin-top: auto; padding-top: 20px; }

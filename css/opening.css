@@ -1,0 +1,70 @@
+/* 开场：云海之上一行题名。显影 → 启程 → 镜头下落到山河总览 */
+.opening {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  overflow: hidden;
+  transition: opacity 900ms var(--ease-out);
+}
+.opening::before {
+  /* 首次进入：从一片纸白中显影 */
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: var(--paper);
+  opacity: 1;
+  transition: opacity 2.2s var(--ease-out);
+  pointer-events: none;
+}
+.opening.ready::before { opacity: 0; }
+.opening.leaving { opacity: 0; pointer-events: none; }
+
+.opening-content {
+  position: absolute;
+  left: 50%;
+  top: 30%;
+  transform: translate(-50%, -50%);
+  display: grid;
+  justify-items: center;
+  gap: 14px;
+  text-align: center;
+  z-index: 3;
+  text-shadow: var(--halo);
+}
+.opening-content > * { opacity: 0; transform: translateY(10px); transition: opacity 1.4s var(--ease-out), transform 1.4s var(--ease-out); }
+.opening.ready .opening-content > * { opacity: 1; transform: none; }
+.opening.ready .op-brand { transition-delay: 700ms; }
+.opening.ready .op-title { transition-delay: 1000ms; }
+.opening.ready .op-line { transition-delay: 1500ms; }
+.opening.ready .op-start { transition-delay: 1900ms; }
+.opening.launch .opening-content > * { opacity: 0; transform: translateY(-12px); transition-delay: 0ms; transition-duration: 700ms; }
+
+.op-brand { margin: 0; display: flex; align-items: center; gap: 10px; font-family: var(--font-display); font-size: 15px; letter-spacing: 8px; color: var(--ink-2); }
+.op-brand .seal { text-shadow: none; }
+.op-title { font-size: clamp(64px, 8vw, 128px); line-height: 1.05; letter-spacing: .32em; margin-right: -.32em; color: var(--ink); }
+.op-line { margin: 0; font-family: var(--font-display); font-size: clamp(15px, 1.3vw, 18px); letter-spacing: 6px; color: var(--ink-2); }
+.op-start {
+  margin-top: 22px;
+  min-height: 44px;
+  padding: 10px 40px 10px 46px;
+  font-family: var(--font-display);
+  font-size: 16px;
+  letter-spacing: 12px;
+  color: var(--ink);
+  border: 1px solid var(--rule-strong);
+  background: rgba(247, 243, 236, .55);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  text-shadow: none;
+}
+@media (hover: hover) and (pointer: fine) {
+  .op-start:not(:disabled):hover { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+}
+
+.opening-tools { position: absolute; right: var(--gutter); bottom: 28px; display: flex; gap: 6px; z-index: 3; }
+.opening-tools button { font-size: var(--fs-small); letter-spacing: 2px; color: var(--ink-2); text-shadow: var(--halo); }
+
+/* 开场期间隐藏界面，只留山河 */
+.shell { transition: opacity 1s var(--ease-out); }
+body.in-opening .shell { opacity: 0; pointer-events: none; }
+.op-start:focus-visible { outline-color: rgba(29, 27, 24, .22); outline-offset: 5px; }

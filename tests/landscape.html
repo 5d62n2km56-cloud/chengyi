@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>承艺 · 山河镜头预览</title>
+<style>html, body { margin: 0; height: 100%; background: #000; overflow: hidden; } canvas { width: 100%; height: 100%; display: block; }</style>
+<script type="importmap">{ "imports": { "three": "../js/vendor/three.module.min.js" } }</script>
+</head>
+<body>
+<!-- 单独查看山河镜头：?m=opening | overview | focus -->
+<canvas id="c"></canvas>
+<script type="module">
+import { createLandscape } from '../js/render/landscape.js';
+import { SAMPLES } from '../js/data/regions.js';
+import { CRAFTS } from '../js/data/crafts.js';
+const m = new URLSearchParams(location.search).get('m') || 'opening';
+const land = createLandscape(document.getElementById('c'), {
+  places: SAMPLES.map(s => ({ id: s.region, x: s.x, y: s.y, open: !!CRAFTS[s.crafts[0]] })),
+});
+land.jump(m === 'focus' ? 'focus' : m, '江西');
+land.setActive(true);
+</script>
+</body>
+</html>

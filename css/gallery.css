@@ -1,0 +1,37 @@
+/* 我的作品：像一本作品集，照片是主角 */
+#gallery-view { background: var(--paper); }
+.gallery-layout { height: 100%; overflow: auto; padding: calc(var(--topbar-h) + 40px) calc(var(--gutter) + 2vw) 80px; scrollbar-width: thin; }
+.gallery-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; padding-bottom: 22px; margin-bottom: 34px; border-bottom: 1px solid var(--rule); }
+.gallery-head h1 { font-size: var(--fs-h1); letter-spacing: 10px; }
+.gallery-filters { display: flex; gap: 2px; padding: 2px; border-radius: 999px; background: rgba(29, 27, 24, .05); }
+.gallery-filters button { padding: 4px 16px; font-size: var(--fs-small); letter-spacing: 2px; color: var(--ink-3); }
+.gallery-filters button[aria-pressed="true"] { background: var(--card-solid); color: var(--ink); box-shadow: 0 1px 3px rgba(40, 30, 20, .12); }
+
+.gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 48px 32px; }
+.work-card { display: grid; gap: 4px; animation: arrive 520ms var(--ease-out) both; }
+.card-photo { position: relative; aspect-ratio: 4 / 5; overflow: hidden; border-radius: 4px; background: #e8e1d6; }
+.card-photo img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; opacity: 0; transform: scale(1.02); transition: opacity 600ms ease, transform 1.2s var(--ease-out); }
+.card-photo img.ready { opacity: 1; transform: none; }
+.card-status { position: absolute; left: 12px; top: 12px; padding: 2px 10px; font-size: 10px; letter-spacing: 2px; border-radius: 999px; background: rgba(247, 243, 236, .85); color: var(--ink-2); }
+.card-status.done { background: var(--accent); color: var(--accent-ink); }
+.card-name { margin: 14px 0 0; font-size: 19px; letter-spacing: 3px; }
+.card-meta { margin: 0; font-size: var(--fs-tiny); letter-spacing: 1px; color: var(--ink-3); }
+.card-actions { display: flex; flex-wrap: wrap; gap: 0 14px; margin-top: 6px; }
+.card-actions button { padding: 4px 0; min-height: 0; border-radius: 0; font-size: var(--fs-small); color: var(--ink-2); letter-spacing: 1px; }
+.card-actions .delete { margin-left: auto; color: var(--ink-4); }
+.gallery-local { margin-top: 56px; font-size: var(--fs-tiny); letter-spacing: 1px; color: var(--ink-4); }
+
+/* 空态：两张照片，各是一个起点 */
+.gallery-empty { grid-column: 1 / -1; display: grid; gap: 28px; }
+.gallery-empty > p { margin: 0; font-family: var(--font-display); font-size: 18px; letter-spacing: 3px; color: var(--ink-2); }
+.start-tiles { display: grid; grid-template-columns: repeat(2, minmax(0, 360px)); gap: 32px; }
+.start-tile { display: grid; gap: 10px; padding: 0; text-align: left; border-radius: 0; }
+.start-tile .card-photo { width: 100%; }
+.start-tile b { font-family: var(--font-display); font-weight: 400; font-size: 20px; letter-spacing: 4px; }
+.start-tile small { font-size: var(--fs-small); color: var(--ink-3); letter-spacing: 1px; }
+
+@media (hover: hover) and (pointer: fine) {
+  .card-actions button:hover { color: var(--ink); }
+  .card-actions .delete:hover { color: var(--accent); }
+  .start-tile:hover .card-photo img, .work-card:hover .card-photo img { transform: scale(1.025); }
+}

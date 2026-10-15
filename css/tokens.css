@@ -1,0 +1,61 @@
+/*
+  承艺设计变量：换风格只改这个文件。
+  方向「素纸 · 天光」：宣纸般的暖白底，墨色文字，朱砂只用在最重要的一处。
+  器物是主角，界面退到边上：少边框、少色块、少图标，字小而清楚。
+*/
+
+:root {
+  /* 纸 */
+  --paper: #f3eee5;
+  --paper-2: #ebe4d8;
+  --paper-3: #ddd4c4;
+  --card: rgba(248, 245, 239, .88);
+  --card-solid: #f7f3ec;
+
+  /* 墨 */
+  --ink: #1d1b18;
+  --ink-2: #4b463e;
+  --ink-3: #847c6f;
+  --ink-4: #b3ab9d;
+
+  /* 线 */
+  --rule: rgba(29, 27, 24, .1);
+  --rule-strong: rgba(29, 27, 24, .24);
+
+  /* 朱砂 */
+  --accent: #9f2e1d;
+  --accent-hover: #b4381f;
+  --accent-ink: #fbf6ee;
+
+  /* 浮在画面上的文字：白色描边，保证在山水上可读 */
+  --halo: 0 0 2px rgba(247, 243, 236, .95), 0 0 6px rgba(247, 243, 236, .9), 0 0 14px rgba(247, 243, 236, .7);
+
+  /* 字体：标题用宋体，正文用系统黑体 */
+  --font-display: "Songti SC", "STSong", "Noto Serif CJK SC", "Source Han Serif SC", "SimSun", serif;
+  --font-body: "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+
+  /* 字号 */
+  --fs-hero: clamp(56px, 6.2vw, 96px);
+  --fs-h1: 40px;
+  --fs-h2: 30px;
+  --fs-body: 14px;
+  --fs-small: 12px;
+  --fs-tiny: 11px;
+
+  /* 阴影：像纸放在桌上，不像悬浮的按钮 */
+  --shadow-card: 0 1px 2px rgba(40, 30, 20, .06), 0 18px 50px rgba(40, 30, 20, .14);
+  --shadow-soft: 0 12px 30px rgba(40, 30, 20, .1);
+
+  /* 动效 */
+  --ease-out: cubic-bezier(.23, 1, .32, 1);
+  --ease-in-out: cubic-bezier(.77, 0, .175, 1);
+  --t-fast: 180ms;
+  --t-mid: 420ms;
+  --t-slow: 900ms;
+
+  /* 结构 */
+  --topbar-h: 64px;
+  --gutter: 40px;
+
+  color-scheme: light;
+}

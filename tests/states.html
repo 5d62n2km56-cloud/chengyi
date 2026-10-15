@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>承艺 · 状态截图</title>
+<style>html, body { margin: 0; height: 100%; overflow: hidden; } iframe { width: 100%; height: 100%; border: 0; display: block; }</style>
+</head>
+<body>
+<!-- 用于截图评审：?s=focus | revealed | card | glaze | chat | fired | finish | gallery | share | empty | album | paper，把原型停在对应状态 -->
+<iframe id="app" src="../index.html#explore"></iframe>
+<script>
+const wait = ms => new Promise(r => setTimeout(r, ms));
+const state = new URLSearchParams(location.search).get('s') || 'focus';
+document.getElementById('app').addEventListener('load', async () => {
+  const doc = document.getElementById('app').contentDocument;
+  const win = document.getElementById('app').contentWindow;
+  try { win.localStorage.removeItem('chengyi-app-v1'); } catch (e) {}
+  const $ = id => doc.getElementById(id);
+  for (let i = 0; i < 50 && !doc.querySelector('.place'); i++) await wait(200);
+  const tap = el => {
+    const r = el.getBoundingClientRect();
+    const o = { bubbles: true, button: 0, pointerId: 1, clientX: r.left + r.width / 2, clientY: r.top + r.height / 2 };
+    el.dispatchEvent(new win.PointerEvent('pointerdown', o));
+    el.dispatchEvent(new win.PointerEvent('pointerup', o));
+  };
+  if (state === 'empty') { doc.querySelector('[data-view="gallery"]').click(); return; }
+  if (state === 'paper') { doc.querySelector('[data-view="gallery"]').click(); await wait(300); doc.querySelector('[data-start="paper"]').click(); await wait(400); $('next-step').click(); await wait(400); $('next-step').click(); return; }
+  tap(doc.querySelector('[data-region="江西"]'));
+  await wait(2200);
+  if (state === 'focus') return;
+  $('reveal-skip').click();
+  await wait(600);
+  if (state === 'revealed') return;
+  $('enter-atelier').click();
+  await wait(800);
+  if (state === 'card') { doc.querySelector('[data-hotspot="process"]').click(); return; }
+  doc.querySelector('[data-hotspot="start"]').click();
+  await wait(800);
+  for (const text of ['做一只青绿色花瓶', '为什么青花是蓝色的']) {
+    $('chat-input').value = text;
+    $('chat-form').requestSubmit();
+    await wait(900);
+  }
+  doc.querySelector('[data-apply]').click();
+  await wait(400);
+  if (state === 'chat') { $('voice-toggle').click(); return; }
+  doc.querySelector('[data-pattern="flower"]').click();
+  await wait(400);
+  if (state === 'glaze') return;
+  $('next-step').click();
+  await wait(4000);
+  if (state === 'fired') return;
+  $('finish-work').click();
+  await wait(800);
+  if (state === 'finish') return;
+  $('work-name').value = '雨过天青';
+  $('finish-form').requestSubmit();
+  await wait(1200);
+  if (state === 'gallery') return;
+  if (state === 'share') { doc.querySelector('[data-share]').click(); return; }
+  doc.getElementById('album-button').click();
+});
+</script>
+</body>
+</html>

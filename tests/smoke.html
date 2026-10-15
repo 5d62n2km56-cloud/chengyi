@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>承艺 · 冒烟测试</title>
+<style>
+  body { margin: 0; font: 13px/1.6 ui-monospace, Menlo, monospace; background: #111; color: #ddd; }
+  iframe { width: 1440px; height: 900px; border: 0; display: block; }
+  #log { padding: 12px 16px; white-space: pre-wrap; }
+  .pass { color: #8fd18f; } .fail { color: #f08a7a; }
+</style>
+</head>
+<body>
+<!-- 自动走一遍主流程：山河 → 产地 → 工坊入口 → 创作 → 对话 → 册页 → 入窑 → 完成 → 作品照片 → 删除 → 剪纸 → AI 不可用兜底 -->
+<iframe id="app" src="../index.html#explore"></iframe>
+<pre id="log"></pre>
+<script>
+const log = document.getElementById('log');
+const results = [];
+const wait = ms => new Promise(r => setTimeout(r, ms));
+function check(name, ok, detail = '') {
+  results.push(ok);
+  log.insertAdjacentHTML('beforeend', `<span class="${ok ? 'pass' : 'fail'}">${ok ? 'PASS' : 'FAIL'}</span> ${name}${detail ? ' — ' + detail : ''}\n`);
+}
+
+async function run() {
+  const frame = document.getElementById('app');
+  const win = frame.contentWindow;
+  const doc = frame.contentDocument;
+  const errors = [];
+  win.addEventListener('error', e => errors.push(e.message));
+  win.addEventListener('unhandledrejection', e => errors.push(String(e.reason)));
+  try { win.localStorage.clear(); } catch (e) {}
+  const $ = id => doc.getElementById(id);
+  const visible = el => !!el && !el.hidden && el.getClientRects().length > 0;
+  const $$ = sel => [...doc.querySelectorAll(sel)];
+  const click = el => el && el.click();
+  const pointerTap = el => {
+    const r = el.getBoundingClientRect();
+    const opts = { bubbles: true, button: 0, pointerId: 1, clientX: r.left + r.width / 2, clientY: r.top + r.height / 2 };
+    el.dispatchEvent(new win.PointerEvent('pointerdown', opts));
+    el.dispatchEvent(new win.PointerEvent('pointerup', opts));
+  };
+  const chat = async text => {
+    $('chat-input').value = text;
+    $('chat-form').requestSubmit();
+    await wait(900);
+    const msgs = doc.querySelectorAll('#messages .message.ai');
+    return msgs[msgs.length - 1];
+  };
+
+  for (let i = 0; i < 50 && !doc.querySelector('.place'); i++) await wait(200);
+  check('山河：地点已渲染', doc.querySelectorAll('.place').length === 8, `${doc.querySelectorAll('.place').length} 个`);
+  check('山河：开场在锚点进入时跳过', $('opening').hidden);
+
+  pointerTap(doc.querySelector('[data-region="江西"]'));
+  await wait(400);
+  check('产地聚焦：卡片出现', visible($('place-card')) && $('place-title').textContent === '瓷器', $('place-title').textContent);
+  check('产地聚焦：层级显示', $('map-trail').textContent.includes('江西'));
+  check('长按前不显示进入工坊', $('enter-atelier').hidden);
+  click($('reveal-skip'));
+  await wait(100);
+  check('直接展开后可进入工坊', !$('enter-atelier').hidden && !$('enter-atelier').disabled);
+
+  pointerTap(doc.querySelector('[data-region="贵州"]'));
+  await wait(300);
+  click($('reveal-skip'));
+  check('仅预览品类不可创作', $('enter-atelier').disabled && $('enter-atelier').textContent.includes('暂未开放'));
+  pointerTap($('map-viewport'));
+  await wait(300);
+  check('点空白收起卡片回到总览', $('place-card').hidden);
+
+  pointerTap(doc.querySelector('[data-region="江西"]'));
+  await wait(300);
+  click($('reveal-skip'));
+  click($('enter-atelier'));
+  await wait(500);
+  check('工坊入口：场景可见，三个选择', visible($('atelier')) && doc.querySelectorAll('[data-hotspot]').length === 3);
+  check('工坊入口：层级含产地', $('atelier-trail').textContent.includes('江西'));
+
+  click(doc.querySelector('[data-hotspot="process"]'));
+  await wait(300);
+  check('看工序：卡片列出 3 道工序', visible($('atelier-card')) && $('atelier-card-body').querySelectorAll('li').length === 3);
+  click($('atelier-card-close'));
+  click(doc.querySelector('[data-hotspot="tools"]'));
+  await wait(200);
+  check('认识工具：卡片出现', $('atelier-card-title').textContent === '工具与材料');
+  click(doc.querySelector('[data-card-start]'));
+  await wait(600);
+  check('开始创作：进入创作台', visible($('work-layout')) && $('atelier').hidden);
+  check('写实三维已加载', !$('studio-canvas').hidden && $('studio-canvas').getAttribute('data-engine')?.startsWith('three.js'));
+  check('工具盘只露出当前工序的工具', $$('#tray .tool').filter(visible).length === 2, $$('#tray .tool').filter(visible).map(t => t.dataset.tool).join(','));
+  click($('voice-toggle'));
+  check('承艺之声：展开对话', visible($('chat-panel')));
+
+  let m = await chat('做一只青绿色花瓶');
+  const apply = m?.querySelector('[data-apply]');
+  check('AI 改作品：先给建议不直接改', !!apply && $('undo').disabled);
+  click(apply);
+  await wait(200);
+  check('确认后应用并可撤销', !$('undo').disabled && doc.querySelector('.swatch[data-color="jade"]').getAttribute('aria-pressed') === 'true');
+
+  m = await chat('为什么青花是蓝色的');
+  check('知识问答引用册页出处', m?.textContent.includes('钴') && !!m.querySelector('[data-cite]'), m?.textContent.slice(0, 40));
+  m = await chat('今天天气怎么样');
+  check('无关话题礼貌引回', m?.textContent.includes('帮不上忙'));
+  m = await chat('瓷器的釉下彩有哪些流派？');
+  check('册页没有的如实说明', m?.textContent.includes('册页里还没收录'));
+
+  click($('undo'));
+  await wait(100);
+  check('撤销后可重做', !$('redo').disabled);
+  click($('next-step'));
+  await wait(200);
+  check('下一道工序', doc.querySelector('.step.active')?.textContent.includes('施釉'));
+
+  click(doc.querySelector('#messages [data-cite]'));
+  await wait(200);
+  check('出处打开册页并高亮段落', visible($('album')) && !!doc.querySelector('.album-para.highlight'));
+  click($('album-close'));
+  check('关闭册页', $('album').hidden);
+
+  click($('reset-work'));
+  await wait(100);
+  check('重置需二次确认', $('confirm-dialog').open);
+  $('confirm-dialog').close();
+  await wait(100);
+
+  click($('next-step'));
+  await wait(3800);
+  check('入窑：第三道工序出现完成按钮', !$('finish-work').hidden && doc.querySelector('.step.active')?.textContent.includes('窑火'));
+  click($('finish-work'));
+  await wait(400);
+  check('完成：命名浮层', $('finish-dialog').open && $('work-name').value.length > 0, $('work-name').value);
+  $('work-name').value = '测试青瓶';
+  $('finish-form').requestSubmit();
+  await wait(500);
+  check('完成后进入我的作品', visible($('gallery-view')) && $('gallery-grid').textContent.includes('测试青瓶'));
+  for (let i = 0; i < 30 && !doc.querySelector('.card-photo img.ready'); i++) await wait(200);
+  check('作品照片已生成', /^data:image\/(jpeg|svg)/.test(doc.querySelector('.card-photo img')?.src || ''));
+  check('完成作品可实物制作', !!doc.querySelector('[data-order]'));
+
+  click(doc.querySelector('[data-share]'));
+  await wait(150);
+  check('分享浮层含介绍', $('share-dialog').open && $('share-copy').value.includes('测试青瓶'));
+  $('share-dialog').close();
+
+  click(doc.querySelector('[data-delete]'));
+  await wait(150);
+  click($('confirm-ok'));
+  await wait(300);
+  check('删除后列表为空态', !!doc.querySelector('.gallery-empty'));
+
+  click(doc.querySelector('[data-start="paper"]'));
+  await wait(600);
+  check('剪纸创作台', $('tray').dataset.craft === 'paper' && $('slider-name').textContent === '剪刻繁简');
+  click(doc.querySelector('#settings-pop [data-setting="aiDown"] [data-value="on"]'));
+  m = await chat('换成云纹');
+  check('AI 不可用：提示 + 快捷选项', m?.classList.contains('error') && m.querySelectorAll('[data-quick]').length >= 2);
+  click(m?.querySelector('[data-quick]'));
+  await wait(200);
+  check('快捷选项直接修改作品', !$('undo').disabled);
+  click(doc.querySelector('#settings-pop [data-setting="aiDown"] [data-value="off"]'));
+
+  click(doc.querySelector('[data-view="explore"]'));
+  await wait(400);
+  check('返回山河', visible($('explore-view')));
+
+  check('无运行时错误', errors.length === 0, errors.join(' | '));
+  const passed = results.filter(Boolean).length;
+  log.insertAdjacentHTML('afterbegin', `RESULT ${passed}/${results.length}\n`);
+  document.title = `RESULT ${passed}/${results.length}`;
+}
+document.getElementById('app').addEventListener('load', () => run().catch(e => {
+  log.insertAdjacentHTML('beforeend', `<span class="fail">CRASH</span> ${e.stack || e}\n`);
+}));
+</script>
+</body>
+</html>
