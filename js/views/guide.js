@@ -2,7 +2,7 @@
 // 详细对话在工坊里的「问问承艺之声」。
 
 import { $ } from '../core/dom.js';
-import { emit, on } from '../core/bus.js';
+import { on } from '../core/bus.js';
 
 let timer = 0;
 
@@ -25,5 +25,4 @@ export function initGuide() {
     if (view === 'explore') say('点一处地名，看看那里的手艺。');
     if (view === 'gallery') say('你的作品都在这里。可以继续修改、下载图片，或准备实物制作。');
   });
-  emit('guide-ready');
 }

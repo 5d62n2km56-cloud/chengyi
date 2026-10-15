@@ -7,7 +7,7 @@ import { emit } from './bus.js';
 const KEY = 'chengyi-app-v1';
 const MAX_RECORDS = 120;
 
-const store = { version: 1, records: [], last: {}, purpose: 'experience', guideSeen: false };
+const store = { version: 1, records: [], last: {} };
 export let storageAvailable = true;
 
 try {
@@ -20,8 +20,6 @@ try {
           && ['draft', 'done'].includes(r.status) && validState(r.craft, r.state))
         .slice(0, MAX_RECORDS);
       if (parsed.last && typeof parsed.last === 'object') store.last = parsed.last;
-      if (['gift', 'experience'].includes(parsed.purpose)) store.purpose = parsed.purpose;
-      store.guideSeen = !!parsed.guideSeen;
     }
   }
 } catch (e) {
@@ -58,10 +56,4 @@ export function removeRecord(id) {
   store.records = store.records.filter(r => r.id !== id);
   if (record && store.last[record.craft] === id) delete store.last[record.craft];
   return persist();
-}
-
-export const getPurpose = () => store.purpose;
-export function setPurpose(value) {
-  store.purpose = value;
-  persist();
 }

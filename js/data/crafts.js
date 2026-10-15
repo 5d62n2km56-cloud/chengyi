@@ -9,15 +9,6 @@ export const CRAFT_NAMES = {
   pending: '地区工艺',
 };
 
-// 首批工坊：瓷器、剪纸开放创作，其余仅预览
-export const WORLD_CRAFTS = [
-  { id: 'ceramic', open: true },
-  { id: 'paper', open: true },
-  { id: 'textile', open: false },
-  { id: 'wood', open: false },
-  { id: 'metal', open: false },
-];
-
 export const PATTERNS = [
   { id: 'plain', name: '素面', meaning: '不加纹饰，突出器形与釉色本身。', album: null },
   { id: 'flower', name: '花卉', meaning: '缠枝花卉连绵不断，寓意生生不息。', album: 'pattern-flower' },
@@ -42,19 +33,14 @@ export const CRAFTS = {
       { id: 'jar', name: '罐' },
     ],
     steps: [
-      { name: '选型塑坯', caption: '土与水，先有形', hint: '选一个起点', album: 'craft-shape' },
-      { name: '施釉绘饰', caption: '把颜色，落在器身上', hint: '与 AI 一起修改', album: 'craft-glaze' },
-      { name: '窑火成器', caption: '从土色，到一件器物', hint: '看看完整作品', album: 'craft-fire' },
+      { name: '选型塑坯', album: 'craft-shape' },
+      { name: '施釉绘饰', album: 'craft-glaze' },
+      { name: '窑火成器', album: 'craft-fire' },
     ],
     copy: [
       '选择一种器型。想要高一点、宽一点，也可以告诉 AI。',
       '挑选釉色与纹样。生釉颜色发灰、表面粉涩，要入窑烧过才显出真正的釉色。',
       '入窑烧成：窑温升到一千三百度上下，釉熔成玻璃质。这里是示意，真实烧制还有温度、气氛与窑位的变化。',
-    ],
-    stageHints: [
-      '先选器型、调宽窄，下一道工序再看釉色与纹样',
-      '手动选择或应用 AI 建议，实时更新同一件作品',
-      '完成作品后，可导出图片或准备实物制作需求',
     ],
     prompts: ['做一只青绿色花瓶', '花纹改成花卉，瓶口窄一点', '为什么青花是蓝色的'],
     placeholder: '例如：做一只青绿色的花瓶',
@@ -79,19 +65,14 @@ export const CRAFTS = {
       { id: 'diamond', name: '菱形' },
     ],
     steps: [
-      { name: '折纸定样', caption: '一张纸，藏着万般形', hint: '选一个起点', album: 'craft-fold' },
-      { name: '剪刻纹样', caption: '留与去，都是笔迹', hint: '与 AI 一起修改', album: 'craft-cut' },
-      { name: '展开成作', caption: '让纹样，在光里展开', hint: '看看完整作品', album: 'craft-unfold' },
+      { name: '折纸定样', album: 'craft-fold' },
+      { name: '剪刻纹样', album: 'craft-cut' },
+      { name: '展开成作', album: 'craft-unfold' },
     ],
     copy: [
       '选纸形和纸色。纸已经对折成一角，剪一刀，展开就是对称的几处。',
       '挑选纹样、调繁简。剪口落在折叠的这一角上，锯齿、月牙都在这里剪出。',
       '展开成作。折痕还留在纸上；真实剪纸的连通结构还需匠人审核。',
-    ],
-    stageHints: [
-      '先选纸形与纸色，下一道工序再剪刻纹样',
-      '手动选择或应用 AI 建议，实时更新同一件作品',
-      '完成作品后，可导出图片或准备实物制作需求',
     ],
     prompts: ['做一张红色圆形剪纸', '换成花卉纹样，简单一点', '剪纸为什么要对折'],
     placeholder: '例如：做一张红色圆形剪纸',

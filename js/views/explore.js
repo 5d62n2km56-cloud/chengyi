@@ -188,8 +188,6 @@ export function overview(animate = true) {
   render();
 }
 
-export const currentRegion = () => region;
-
 function syncActive() {
   const visible = currentView() === 'explore' || !$('opening').hidden;
   $('world-canvas').classList.toggle('off', !visible);
